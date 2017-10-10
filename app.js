@@ -15,52 +15,52 @@ var sPath = path.join(__dirname, '.');
 app.use(express.static(sPath));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-function fPlay(req, res){
+function fChestOrWindow(req, res){
+  var sFrom = req.body.From;
+  var sAction = req.body.Body;
+  var twiml = new twilio.twiml.MessagingResponse();
+  if(sAction.toLowerCase().search("chest") != -1){
+    twiml.message("You find yourself in the attic of a haunted house. Will you inspect the wooden chest or the dusty window?");
+    oConnections[sFrom].fCurState = fChestOrWindow;
+  }else if(sAction.toLowerCase().search("window") != -1){  
+    twiml.message("You walk into the kitchen, where you find another staircase. Will you go down?");
+    oConnections[sFrom].fCurState = fDownStaircase
+  }else {
+    twiml.message("I'm sorry, I didn't understand that. Will you inspect the wooden chest or the dusty window?")
+  }
+  res.writeHead(200, {'Content-Type': 'text/xml'});
+  res.end(twiml.toString());
+}
+
+function fDownStaircase(req, res){
   var sFrom = req.body.From;
   var sAction = req.body.Body;
   var twiml = new twilio.twiml.MessagingResponse();
   if(sAction.toLowerCase().search("yes") != -1){
-    twiml.message("Oh glory. Here it is. I got it for you. Do you throw it again?");
-  }else if(sAction.toLowerCase().search("no") != -1){
-    twiml.message("Oh well. Wait .... Over there is that a stick or a fire hydrant?");
-    oConnections[sFrom].fCurState = fStickOrHydrant;
-  }else{
-    twiml.message("Wow! I've never seen you do " + sAction + " before. Wait .... Over there is that a stick or a fire hydrant?")
-    oConnections[sFrom].fCurState = fStickOrHydrant;    
-  }
-  res.writeHead(200, {'Content-Type': 'text/xml'});
-  res.end(twiml.toString());
-}
-
-function fStick(req, res){
-  var sFrom = req.body.From;
-  var sAction = req.body.Body;
-  var twiml = new twilio.twiml.MessagingResponse();
-  if(sAction.toLowerCase().search("eat") != -1){
-    oConnections[sFrom].fCurState = fStickOrHydrant;
-    twiml.message("Yum! Sticks are the best thing ever lot's of roughage. Wait .... Over there is that a stick or a fire hydrant?");
-  }else if(sAction.toLowerCase().search("take") != -1){
-    twiml.message("Please play with me. Do you throw the stick?");
-    oConnections[sFrom].fCurState = fPlay;
-  }else{
-    twiml.message("Wow! I've never done " + sAction + " before. Wait .... Over there is that a stick or a fire hydrant?")
-    oConnections[sFrom].fCurState = fStickOrHydrant;    
-  }
-  res.writeHead(200, {'Content-Type': 'text/xml'});
-  res.end(twiml.toString());
-}
-
-function fStickOrHydrant(req, res){
-  var sFrom = req.body.From;
-  var sAction = req.body.Body;
-  var twiml = new twilio.twiml.MessagingResponse();
-  if(sAction.toLowerCase().search("stick") != -1){
-    twiml.message("I love sticks.... Should I eat it or take it to my person so he will throw it?");
-    oConnections[sFrom].fCurState = fStick;
-  }else if(sAction.toLowerCase().search("hydrant") != -1){  
-    twiml.message("Pee mail! How exciting. Wait .... Over there is that a stick or a fire hydrant?");
+    twiml.message("You find yourself in the attic of a haunted house. Will you inspect the wooden chest or the dusty window?");
+    oConnections[sFrom].fCurState = fChestOrWindow;
+  }else if(sAction.toLowerCase().search("no") != -1){  
+    twiml.message("You walk into the kitchen, where you find another staircase. Will you go down?");
+    oConnections[sFrom].fCurState = fDownStaircase
   }else {
-    twiml.message("Wow! I've never seen " + sAction + " before. Wait .... Over there is that a stick or a fire hydrant?")
+    twiml.message("That was a yes or no question. Will you descend the staircase?")
+  }
+  res.writeHead(200, {'Content-Type': 'text/xml'});
+  res.end(twiml.toString());
+}
+
+function fUpStaircase(req, res){
+  var sFrom = req.body.From;
+  var sAction = req.body.Body;
+  var twiml = new twilio.twiml.MessagingResponse();
+  if(sAction.toLowerCase().search("yes") != -1){
+    twiml.message("You find yourself in the attic of a haunted house. Will you inspect the wooden chest or the dusty window?");
+    oConnections[sFrom].fCurState = fChestOrWindow;
+  }else if(sAction.toLowerCase().search("no") != -1){  
+    twiml.message("You walk into the kitchen, where you find another staircase. Will you go down?");
+    oConnections[sFrom].fCurState = fDownStaircase
+  }else {
+    twiml.message("That was a yes or no question. Will you ascend the staircase?")
   }
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
@@ -68,9 +68,9 @@ function fStickOrHydrant(req, res){
 
 function fBeginning(req, res){
   var sFrom = req.body.From;
-  oConnections[sFrom].fCurState = fStickOrHydrant;
+  oConnections[sFrom].fCurState = fUpStaircase;
   var twiml = new twilio.twiml.MessagingResponse();
-  twiml.message('Hi ... My name is Sheba. I am very enthusiastic about this game. Wait! Is that a stick or a fire hydrant?');
+  twiml.message('You find yourself in a haunted house. It is spooky scary. You see a staircase. Will you go up?');
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
 
